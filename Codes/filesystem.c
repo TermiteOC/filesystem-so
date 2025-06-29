@@ -30,8 +30,6 @@ TreeNode* create_directory(const char* name) {
     return node;
 }
 
-// ========== IMPLEMENTAÇÕES ADICIONADAS ==========
-
 // Função auxiliar para criar novo nó de árvore B
 static BTreeNode* btree_create_node(int leaf) {
     BTreeNode* node = malloc(sizeof(BTreeNode));
@@ -61,7 +59,7 @@ static TreeNode* btree_search_recursive(BTreeNode* node, const char* name) {
 }
 
 TreeNode* btree_search(BTree* tree, const char* name) {
-    printf("Buscando: %s (simulado)\n", name);
+    printf("Buscando: %s\n", name);
     return btree_search_recursive(tree->root, name);
 }
 
@@ -120,7 +118,7 @@ static void btree_insert_nonfull(BTreeNode* node, TreeNode* k) {
 }
 
 void btree_insert(BTree* tree, TreeNode* k) {
-    printf("Inserindo: %s (simulado)\n", k->name);
+    printf("Inserindo: %s\n", k->name);
 
     if (btree_search(tree, k->name)) {
         printf("Erro: nome '%s' ja existe no diretorio.\n", k->name);
@@ -158,7 +156,7 @@ static void free_treenode(TreeNode* node) {
 
 // Exclusão de chave da raiz (simples)
 void btree_delete(BTree* tree, const char* name) {
-    printf("Removendo: %s (simulado)\n", name);
+    printf("Removendo: %s\n", name);
 
     if (!tree || !tree->root) return;
     BTreeNode* node = tree->root;
@@ -173,46 +171,6 @@ void btree_delete(BTree* tree, const char* name) {
         }
     }
     printf("'%s' nao encontrado para remocao.\n", name);
-}
-
-void delete_txt_file(BTree* tree, const char* name) {
-    printf("Arquivo '%s' deletado (simulado)\n", name);
-
-    TreeNode* node = btree_search(tree, name);
-    if (!node || node->type != FILE_TYPE) {
-        printf("Arquivo '%s' nao encontrado.\n", name);
-        return;
-    }
-    btree_delete(tree, name);
-    printf("Arquivo '%s' deletado com sucesso.\n", name);
-}
-
-void delete_directory(BTree* tree, const char* name) {
-    printf("Diretório '%s' deletado (simulado)\n", name);
-
-    TreeNode* node = btree_search(tree, name);
-    if (!node || node->type != DIRECTORY_TYPE) {
-        printf("Diretorio '%s' nao encontrado.\n", name);
-        return;
-    }
-    if (node->data.directory->tree->root != NULL && node->data.directory->tree->root->num_keys > 0) {
-        printf("Diretorio '%s' nao esta vazio.\n", name);
-        return;
-    }
-    btree_delete(tree, name);
-    printf("Diretorio '%s' deletado com sucesso.\n", name);
-}
-
-void change_directory(Directory** current, const char* path) {
-    printf("Mudando para o diretório: %s (simulado)\n", path);
-
-    TreeNode* node = btree_search((*current)->tree, path);
-    if (!node || node->type != DIRECTORY_TYPE) {
-        printf("Diretorio '%s' nao encontrado.\n", path);
-        return;
-    }
-    *current = node->data.directory;
-    printf("Diretorio atual: %s\n", path);
 }
 
 static void btree_traverse_recursive(BTreeNode* node) {
@@ -235,13 +193,49 @@ void btree_traverse(BTree* tree) {
     btree_traverse_recursive(tree->root);
 }
 
-void list_directory_contents(Directory* dir) {
-    printf("Conteúdo do diretório:\n");
-    btree_traverse(dir->tree);
+void delete_txt_file(BTree* tree, const char* name) {
+    TreeNode* node = btree_search(tree, name);
+    if (!node || node->type != FILE_TYPE) {
+        printf("Arquivo '%s' nao encontrado.\n", name);
+        return;
+    }
+    btree_delete(tree, name);
+    printf("Arquivo '%s' deletado\n", name);
+}
+
+void delete_directory(BTree* tree, const char* name) {
+    TreeNode* node = btree_search(tree, name);
+    if (!node || node->type != DIRECTORY_TYPE) {
+        printf("Diretorio '%s' nao encontrado.\n", name);
+        return;
+    }
+    if (node->data.directory->tree->root != NULL && node->data.directory->tree->root->num_keys > 0) {
+        printf("Diretorio '%s' nao esta vazio.\n", name);
+        return;
+    }
+    btree_delete(tree, name);
+    printf("Diretório '%s' deletado\n", name);
 }
 
 Directory* get_root_directory() {
     Directory* root = malloc(sizeof(Directory));
     root->tree = btree_create();
     return root;
+}
+
+void change_directory(Directory** current, const char* path) {
+    printf("Mudando para o diretório: %s\n", path);
+
+    TreeNode* node = btree_search((*current)->tree, path);
+    if (!node || node->type != DIRECTORY_TYPE) {
+        printf("Diretorio '%s' nao encontrado.\n", path);
+        return;
+    }
+    *current = node->data.directory;
+    printf("Diretorio atual: %s\n", path);
+}
+
+void list_directory_contents(Directory* dir) {
+    printf("Conteúdo do diretório:\n");
+    btree_traverse(dir->tree);
 }
