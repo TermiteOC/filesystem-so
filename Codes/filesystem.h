@@ -59,4 +59,6 @@ Directory* get_root_directory();
 void change_directory(Directory** current, const char* path);
 void list_directory_contents(Directory* dir);
 
+void save_img(FILE* out, Directory* dir, int nivel, const char* prefixo);
+
 #endif
