@@ -4,9 +4,16 @@
 #include <string.h>
 
 #define MAX_INPUT 256
+#define MAX_PATH_DEPTH 100
 
 void terminal_interface(Directory* root) {
+    Directory* dir_stack[MAX_PATH_DEPTH];
+    int dir_top = 0;
+
+    dir_stack[dir_top] = root;
+    dir_top++;
     Directory* current = root;
+
     char input[MAX_INPUT];
 
     while (1) {
@@ -21,14 +28,35 @@ void terminal_interface(Directory* root) {
 
         if (strcmp(cmd, "ls") == 0) {
             list_directory_contents(current);
-        } else if (strcmp(cmd, "cd") == 0) {
+        }
+        else if (strcmp(cmd, "cd") == 0) {
             char* dir_name = strtok(NULL, " ");
-            if (dir_name) {
-                change_directory(&current, dir_name);
-            } else {
+            if (!dir_name) {
                 printf("Uso: cd <nome_diretorio>\n");
+                continue;
             }
-        } else if (strcmp(cmd, "mkdir") == 0) {
+            if (strcmp(dir_name, "..") == 0) {
+                if (dir_top > 1) {
+                    dir_top--;
+                    current = dir_stack[dir_top - 1];
+                    printf("Voltou para o diretório anterior.\n");
+                } else {
+                    printf("Já está no diretório raiz.\n");
+                }
+            } else {
+                TreeNode* node = btree_search(current->tree, dir_name);
+                if (!node || node->type != DIRECTORY_TYPE) {
+                    printf("Diretorio '%s' nao encontrado.\n", dir_name);
+                } else {
+                    current = node->data.directory;
+                    if (dir_top < MAX_PATH_DEPTH) {
+                        dir_stack[dir_top++] = current;
+                    }
+                    printf("Diretorio atual: %s\n", dir_name);
+                }
+            }
+        }
+        else if (strcmp(cmd, "mkdir") == 0) {
             char* name = strtok(NULL, " ");
             if (name) {
                 TreeNode* dir = create_directory(name);
@@ -36,7 +64,8 @@ void terminal_interface(Directory* root) {
             } else {
                 printf("Uso: mkdir <nome_diretorio>\n");
             }
-        } else if (strcmp(cmd, "touch") == 0) {
+        }
+        else if (strcmp(cmd, "touch") == 0) {
             char* name = strtok(NULL, " ");
             char* content = strtok(NULL, "");
             if (name && content) {
@@ -51,23 +80,27 @@ void terminal_interface(Directory* root) {
             } else {
                 printf("Uso: touch <nome_arquivo> <conteudo>\n");
             }
-        } else if (strcmp(cmd, "rm") == 0) {
+        }
+        else if (strcmp(cmd, "rm") == 0) {
             char* name = strtok(NULL, " ");
             if (name) {
                 delete_txt_file(current->tree, name);
             } else {
                 printf("Uso: rm <nome_arquivo>\n");
             }
-        } else if (strcmp(cmd, "rmdir") == 0) {
+        }
+        else if (strcmp(cmd, "rmdir") == 0) {
             char* name = strtok(NULL, " ");
             if (name) {
                 delete_directory(current->tree, name);
             } else {
                 printf("Uso: rmdir <nome_diretorio>\n");
             }
-        } else if (strcmp(cmd, "exit") == 0) {
+        }
+        else if (strcmp(cmd, "exit") == 0) {
             break;
-        } else {
+        }
+        else {
             printf("Comando desconhecido: %s\n", cmd);
         }
     }
