@@ -20,7 +20,7 @@ void terminal_interface(Directory* root) {
         printf("> ");
         if (!fgets(input, sizeof(input), stdin)) break;
 
-        // Remover \n
+        // remove \n
         input[strcspn(input, "\n")] = 0;
 
         char* cmd = strtok(input, " ");
