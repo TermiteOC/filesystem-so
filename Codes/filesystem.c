@@ -6,19 +6,6 @@ BTree* btree_create() {
     return tree;
 }
 
-TreeNode* create_txt_file(const char* name, const char* content) {
-    File* file = malloc(sizeof(File));
-    file->name = strdup(name);
-    file->content = strdup(content);
-    file->size = strlen(content);
-
-    TreeNode* node = malloc(sizeof(TreeNode));
-    node->name = strdup(name);
-    node->type = FILE_TYPE;
-    node->data.file = file;
-    return node;
-}
-
 TreeNode* create_directory(const char* name) {
     Directory* dir = malloc(sizeof(Directory));
     dir->tree = btree_create();
@@ -182,6 +169,19 @@ void btree_traverse_recursive(BTreeNode* node) {
 
 void btree_traverse(BTree* tree) {
     btree_traverse_recursive(tree->root);
+}
+
+TreeNode* create_txt_file(const char* name, const char* content) {
+    File* file = malloc(sizeof(File));
+    file->name = strdup(name);
+    file->content = strdup(content);
+    file->size = strlen(content);
+
+    TreeNode* node = malloc(sizeof(TreeNode));
+    node->name = strdup(name);
+    node->type = FILE_TYPE;
+    node->data.file = file;
+    return node;
 }
 
 void delete_txt_file(BTree* tree, const char* name) {
